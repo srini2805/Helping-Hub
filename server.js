@@ -62,6 +62,10 @@ app.post("/api/bookings", async (req, res) => {
 });
 
 // Read
+app.get("/", (req, res) => {
+  res.send("Helping Hub backend is running successfully 🚀");
+});
+
 app.get("/api/bookings", async (req, res) => {
   try {
     const bookings = await Booking.find();
