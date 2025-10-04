@@ -2,7 +2,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const bodyParser = require("body-parser");
+const path = require("path");
 
 const app = express();
 
@@ -11,17 +11,18 @@ app.use(cors());
 app.use(express.json());
 
 // =================== MongoDB Atlas Connection ===================
+// Use environment variable for MongoDB URI for security
+const MONGO_URI =
+  process.env.MONGO_URI ||
+  "mongodb+srv://srinithi:sri82nithi@plantportal.iffjj.mongodb.net/?retryWrites=true&w=majority&appName=Plantportal";
+
 mongoose
-  .connect(
-"mongodb+srv://srinithi:sri82nithi@plantportal.iffjj.mongodb.net/?retryWrites=true&w=majority&appName=Plantportal",    {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    }
-  )
+  .connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log("✅ MongoDB Atlas connected"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
 // =================== Schema & Model ===================
+
 const bookingSchema = new mongoose.Schema({
   service: String,
   name: String,
@@ -32,10 +33,9 @@ const bookingSchema = new mongoose.Schema({
   image: String,
   status: {
     type: String,
-    default: "Pending", // default when customer books
+    default: "Pending",
   },
 });
-
 
 const Booking = mongoose.model("Booking", bookingSchema);
 
@@ -50,7 +50,7 @@ const Feedback = mongoose.model("Feedback", feedbackSchema);
 
 // =================== CRUD Routes ===================
 
-// Create
+// Create booking
 app.post("/api/bookings", async (req, res) => {
   try {
     const newBooking = new Booking(req.body);
@@ -61,9 +61,7 @@ app.post("/api/bookings", async (req, res) => {
   }
 });
 
-// Read
-
-
+// Get all bookings
 app.get("/api/bookings", async (req, res) => {
   try {
     const bookings = await Booking.find();
@@ -73,7 +71,7 @@ app.get("/api/bookings", async (req, res) => {
   }
 });
 
-// Update
+// Update booking
 app.put("/api/bookings/:id", async (req, res) => {
   try {
     const updated = await Booking.findByIdAndUpdate(req.params.id, req.body, {
@@ -85,7 +83,7 @@ app.put("/api/bookings/:id", async (req, res) => {
   }
 });
 
-// Delete
+// Delete booking
 app.delete("/api/bookings/:id", async (req, res) => {
   try {
     await Booking.findByIdAndDelete(req.params.id);
@@ -94,8 +92,6 @@ app.delete("/api/bookings/:id", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-// =================== Feedback Schema & Model ===================
-
 
 // =================== Feedback Routes ===================
 
@@ -120,6 +116,16 @@ app.get("/api/feedbacks", async (req, res) => {
   }
 });
 
+// =================== Serve React Frontend (Optional) ===================
+// Uncomment if you want to serve frontend from backend
+/*
+app.use(express.static(path.join(__dirname, "client/build")));
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "client/build", "index.html"));
+});
+*/
+
 // =================== Start Server ===================
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
