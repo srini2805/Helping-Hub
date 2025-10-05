@@ -26,7 +26,7 @@ Helping Hub is a community-driven web platform that connects users who need assi
 
 ---
 
-## 🧩 Tech Stack
+##  Tech Stack
 
 | Layer | Technology |
 |-------|-------------|
